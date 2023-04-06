@@ -45,7 +45,7 @@ function SignUp() {
       setPasswordRedBox(true);
       setConfirmPasswordRedBox(true);
     }
-    if (email == "" || email == null) {
+    if (email === "" || email == null) {
       flag = 1;
       setEmailRedBox(true);
     }
@@ -63,7 +63,7 @@ function SignUp() {
         theme: "light",
       });
     }
-    if (flag == 0) {
+    if (flag === 0) {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           if (userCredential) {
