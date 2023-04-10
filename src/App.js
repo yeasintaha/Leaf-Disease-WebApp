@@ -5,13 +5,15 @@ import { useState } from "react";
 import Signin from "./Component/Signin";
 import SignUp from "./Component/SignUp";
 import { UserContext } from "./UserContext";
-import { HiOutlineUserCircle } from "react-icons/hi";
+import Audio from "./Component/Audio";
+import Stopwatch from "./Component/Stopwatch";
 
 function App() {
   const [userCredentials, setUserCredentials] = useState({
-    Email: null,
-    Password: null,
+    Email: "",
+    Password: "",
   });
+
   return (
     <UserContext.Provider value={{ userCredentials, setUserCredentials }}>
       <Router>

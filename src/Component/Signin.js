@@ -18,6 +18,12 @@ function Signin() {
 
   const { userCredentials, setUserCredentials } = useContext(UserContext);
 
+  // useEffect(() => {
+  //   if (userCredentials.Email != "") {
+  //     navigate("/home");
+  //   }
+  // });
+
   // const signin = (e) => {
   //   navigate("/");
   // };

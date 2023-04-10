@@ -1,14 +1,23 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import MicRecorder from "mic-recorder-to-mp3";
 import "./HomePage.css";
 import { UserContext } from "../UserContext";
 import { card_disease } from "../Data/card_disease";
 import axios from "axios";
 import { storage } from "../firebase";
-import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  listAll,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { v4 } from "uuid";
 import { RiDeleteBack2Fill } from "react-icons/ri";
-import { HiOutlineUserCircle } from "react-icons/hi";
-import { IoMdLogOut } from "react-icons/io";
+import { IoMdLogOut, IoMdMic, IoMdImage } from "react-icons/io";
+import { FaFileAudio } from "react-icons/fa";
+import { BsStopCircleFill } from "react-icons/bs";
+import { GrMicrophone } from "react-icons/gr";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -23,6 +32,15 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 
+// const SpeechRecognition =
+//   window.SpeechRecognition || window.webkitSpeechRecognition;
+
+// const mic = new SpeechRecognition();
+
+// mic.continuous = true;
+// mic.interimResults = true;
+// mic.lang = "bn-BD";
+
 function HomePage() {
   const [image, setImage] = useState(null);
   const [moreImages, setMoreImages] = useState(null);
@@ -30,16 +48,302 @@ function HomePage() {
   const [typeResponse, setTypeResponse] = useState(null);
   const [seeMore, setSeeMore] = useState(false);
   const [content, setContent] = useState(true);
+  const [audioFile, setAudioFile] = useState(null);
+  const [isRecording, setIsRecording] = useState(null);
+  const recorder = useRef(null); //Recorder
+  const audioPlayer = useRef(null); //Ref for the HTML Audio Tag
+  const [blobURL, setBlobUrl] = useState(null);
+  // const [isListening, setIsListening] = useState(false);
+  // const [speechDialog, setSpeechDialog] = useState(null);
+  // const [savedDialog, setSavedDialog] = useState([]);
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const intervalRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   const { userCredentials, setUserCredentials } = useContext(UserContext);
 
   useEffect(() => {
-    if (userCredentials.email == null) {
-      // navigate("/");
+    //Declares the recorder object and stores it inside of ref
+    recorder.current = new MicRecorder({ bitRate: 128 });
+  }, []);
+
+  function handleStart() {
+    if (isRunning) return;
+    clearInterval(intervalRef.current);
+    setTime(0);
+    setIsRunning(true);
+    intervalRef.current = setInterval(() => {
+      setTime((prevTime) => prevTime + 1);
+    }, 1000);
+  }
+
+  function handleStop() {
+    if (!isRunning) return;
+    setIsRunning(false);
+    clearInterval(intervalRef.current);
+  }
+
+  // function handleReset() {
+  //   clearInterval(intervalRef.current);
+  //   setIsRunning(false);
+  //   setTime(0);
+  // }
+
+  function formatTime() {
+    const hours = Math.floor(time / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((time % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (time % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+
+  const startRecording = () => {
+    // Check if recording isn't blocked by browser
+    toast.success("Recording is on!", {
+      position: "top-right",
+      autoClose: 500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    recorder.current.start().then(() => {
+      setIsRecording(true);
+    });
+    handleStart();
+  };
+
+  const stopRecording = async () => {
+    handleStop();
+    toast.success("Recording is off!", {
+      position: "top-right",
+      autoClose: 500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    recorder.current
+      .stop()
+      .getMp3()
+      .then(([buffer, blob]) => {
+        const file = new File(buffer, "video.mp3", {
+          type: blob.type,
+          lastModified: Date.now(),
+        });
+        const newBlobUrl = URL.createObjectURL(blob);
+        setBlobUrl(newBlobUrl);
+        setIsRecording(false);
+        setAudioFile(file);
+        console.log(file);
+
+        try {
+          const imageRef = ref(storage, "Images/" + `${file.name}`);
+          uploadBytes(imageRef, file).then(() => {});
+        } catch (e) {
+          alert(e);
+        }
+      })
+      .catch((e) => console.log(e));
+
+    try {
+      setTimeout(async () => {
+        const { data } = await axios.get(
+          `http://127.0.0.1:8000/detect-voice/video.mp3`
+        );
+        if (data.text === "-1") {
+          toast.error("Couldn't understand the voice, Please try again!", {
+            position: "top-right",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        } else {
+          setTypeResponse(data.text);
+          setTimeout(async () => {
+            const { data } = await axios.get(
+              `http://127.0.0.1:8000/detect-symptomps/${typeResponse}`
+            );
+            // alert(data.message);
+            setTypeResponse(data);
+            console.log(data.sim);
+          }, 300);
+          // alert(data.text);
+        }
+      }, 1000);
+
+      setTimeout(() => {
+        const imageRef = ref(storage, "Images/" + `video.mp3`);
+        deleteObject(imageRef)
+          .then(() => {
+            // alert("deleted");
+          })
+          .catch((error) => {
+            // alert("error deleting ");
+          });
+      }, 2000);
+    } catch (err) {
+      alert(err);
     }
-  });
+  };
+
+  const [fileRecord, setFileRecord] = useState(null);
+
+  const handleFileChangeRecord = async (event) => {
+    // alert(e.target.files[0]);
+    console.log(event.target.files[0]);
+    try {
+      setFileRecord(event.target.files[0]);
+      const recordRef = ref(
+        storage,
+        "Images/" + `${event.target.files[0].name}`
+      );
+      uploadBytes(recordRef, event.target.files[0]).then(() => {});
+
+      try {
+        const { data } = await axios.get(
+          `http://127.0.0.1:8000/detect-voice/${event.target.files[0].name}`
+        );
+
+        toast.success("Uploaded successfully!", {
+          position: "top-right",
+          autoClose: 500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        if (data.text === "-1") {
+          toast.error("Couldn't understand the voice, Please try again!", {
+            position: "top-right",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        } else {
+          setTypeResponse(data.text);
+          setTimeout(() => {
+            // alert(data.text);
+            const imageRef = ref(
+              storage,
+              "Images/" + `${event.target.files[0].name}`
+            );
+            deleteObject(imageRef)
+              .then(() => {
+                // alert("deleted");
+              })
+              .catch((error) => {
+                // alert("error deleting ");
+              });
+          }, 2000);
+
+          setTimeout(async () => {
+            const { data } = await axios.get(
+              `http://127.0.0.1:8000/detect-symptomps/${typeResponse}`
+            );
+            // alert(data.message);
+            setTypeResponse(data);
+            console.log(data.sim);
+          }, 300);
+        }
+      } catch (err) {
+        toast.error(
+          "Recorded file either crashed or not in original format, Please Try Again!",
+          {
+            position: "top-right",
+            autoClose: 800,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          }
+        );
+        // window.location.reload(false);
+      }
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  // const handleUploadRecord = () => {
+  //   // const storageRef = firebase.storage().ref();
+  //   // const fileRef = storageRef.child(fileRecord.name);
+  //   // fileRef.put(fileRecord)
+  //   //   .then(() => {
+  //   //     console.log('File uploaded successfully!');
+  //   //   })
+  //   //   .catch((error) => {
+  //   //     console.error(error);
+  //   //   });
+  // };
+
+  // useEffect(() => {
+  //   if (userCredentials.Email === "") {
+  //     navigate("/");
+  //   }
+  // });
+
+  // useEffect(() => {
+  //   handleListen();
+  // }, [isListening]);
+
+  // const handleListen = () => {
+  //   if (isListening) {
+  //     mic.start();
+  //     mic.onend = () => {
+  //       console.log("continue ... ");
+  //       mic.start();
+  //     };
+  //   } else {
+  //     mic.stop();
+  //     mic.onend = () => {
+  //       console.log("stopped mic on click");
+  //     };
+  //   }
+  //   mic.onstart = () => {
+  //     console.log("Mic is on");
+  //   };
+
+  //   mic.onresult = (event) => {
+  //     const transcript = Array.from(event.results)
+  //       .map((result) => result[0])
+  //       .map((result) => result.transcript)
+  //       .join("");
+  //     console.log(transcript);
+  //     setSpeechDialog(transcript);
+  //     // setSavedDialog([...savedDialog, speechDialog]);
+  //     mic.onerror = (event) => {
+  //       console.log(event.error);
+  //     };
+  //   };
+  // };
+
+  // const handleSaveNote = () => {
+  //   setSavedDialog([...savedDialog, speechDialog]);
+  //   // setSpeechDialog();
+  // };
 
   const fetchData = async () => {
     try {
@@ -106,6 +410,10 @@ function HomePage() {
     signOut(auth)
       .then(() => {
         // Sign-out successful.
+        setUserCredentials({
+          Email: "",
+          Password: "",
+        });
         toast.success("Successfully Signed Out!", {
           position: "top-right",
           autoClose: 1000,
@@ -122,13 +430,6 @@ function HomePage() {
         toast.success("Successfully Signed Out!");
       });
   };
-
-  // const [remove, setRemove] = useState(true);
-  // const handleRemove = () => {
-  //   setRemove(false);
-  // };
-
-  // const [imageUpload, setImageUpload] = useState(null);
 
   const [search, setSearch] = useState("");
 
@@ -160,6 +461,7 @@ function HomePage() {
               margin: "10px",
               border: "0.6px solid white",
               boxShadow: " 2px 0px 6px 1px rgba(128, 128, 128, 0.658)",
+              cursor: "pointer",
             }}
             onClick={() => {
               setResponse(card_disease[j].id);
@@ -169,7 +471,7 @@ function HomePage() {
             <CardMedia
               sx={{ height: 200 }}
               image={card_disease[j].image}
-              title="green iguana"
+              title={card_disease[j].id}
             />
             <CardContent>
               <Typography
@@ -209,13 +511,10 @@ function HomePage() {
           margin: "10px",
           border: "0.6px solid white",
           boxShadow: " 2px 0px 6px 1px rgba(128, 128, 128, 0.658)",
+          cursor: "pointer",
         }}
       >
-        <CardMedia
-          sx={{ height: 200 }}
-          image={item.image}
-          title="green iguana"
-        />
+        <CardMedia sx={{ height: 200 }} image={item.image} title={item.id} />
         <CardContent>
           <Typography
             gutterBottom
@@ -272,23 +571,25 @@ function HomePage() {
             flexWrap: "wrap",
             cursor: "pointer",
           }}
+          className="headerLogo"
           src="\leaf.png"
           alt="Leaf"
           onClick={() => window.location.reload(false)}
         />
         <p
-          style={{
-            fontSize: 20,
-            fontWeight: "700",
-            color: "green",
-            cursor: "pointer",
-          }}
+          style={{}}
+          className="titleHeader"
           onClick={() => window.location.reload(false)}
         >
           Rice Leaf Disease Detection{" "}
         </p>
         <div
-          style={{ alignItems: "center", textAlign: "center" }}
+          style={{
+            alignItems: "center",
+            textAlign: "center",
+            cursor: "pointer",
+          }}
+          className="signoutHeader"
           onClick={handleSignout}
         >
           <IoMdLogOut
@@ -310,37 +611,160 @@ function HomePage() {
           </p>
         </div>
       </div>
-      <div style={{ alignContent: "center", textAlign: "center" }}>
-        <TextField
-          id="outlined-basic"
-          label="Type here to identify disease"
-          variant="outlined"
-          style={{
-            backgroundColor: "rgba(0, 255, 0, 0.2)",
-            width: 500,
-          }}
-          value={search}
-          onChange={(e) => handleTypeDetection(e)}
-        />
-        <div class="upload-btn-wrapper">
-          <button class="btnChooseImage">
-            Choose an Image To Identify Disease
-          </button>
-          <input
-            type="file"
-            name="myfile"
-            accept="image/*"
-            onChange={(event) => {
-              handleUpload(event);
-            }}
-          />
+      {/* <div>
+        <h2>hello hello</h2>
+        {isListening ? <span> 🎙️ </span> : <span> 🛑🎙️ </span>}
+        <button onClick={handleSaveNote}> Save note</button>
+        <button onClick={() => setIsListening((prevState) => !prevState)}>
+          Start/Stop
+        </button>
+        <p> {speechDialog}</p>
+        <div>
+          <h3> notes</h3>
+          {savedDialog?.map((n) => (
+            <p key={n}> {n} </p>
+          ))}
         </div>
-        {/* <p>{search}</p>
-        {search && (
-          <p>
-            {typeResponse?.sim[0]}, {typeResponse?.sim[1]}
-          </p>
-        )} */}
+        
+      </div> */}
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{ display: "flex", flexDirection: "column", margin: "20px" }}
+        >
+          <textarea
+            id="outlined-basic"
+            placeholder="Type here to identify disease"
+            variant="outlined"
+            style={{
+              backgroundColor: "rgba(0, 255, 0, 0.2)",
+              width: 200,
+              height: 200,
+            }}
+            value={search}
+            onChange={(e) => handleTypeDetection(e)}
+          />
+          <button
+            className={
+              search ? "typeSuggestDiseaseBtn" : "typeSuggestDiseaseDisabledBtn"
+            }
+            disabled={!search ? true : false}
+          >
+            Detect Disease
+          </button>
+        </div>
+        <div style={{ margin: "20px" }}>
+          <div class="upload-btn-wrapper">
+            <button class="btnChooseImage">
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                <IoMdImage
+                  style={{
+                    fontSize: "90px",
+                    alignContent: "center",
+                    textAlign: "center",
+                    justifyContent: "center",
+                    margin: "0px",
+                    padding: "0px",
+                  }}
+                />
+                <p style={{ paddingTop: "10px" }}>
+                  Choose an Image To Identify Disease{" "}
+                </p>
+              </div>
+            </button>
+            <input
+              type="file"
+              name="myfile"
+              accept="image/*"
+              onChange={(event) => {
+                handleUpload(event);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="file-upload" className="upload-label">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <FaFileAudio
+                  style={{
+                    fontSize: "40px",
+                    alignContent: "center",
+                    textAlign: "center",
+                    justifyContent: "center",
+                    marginRight: "5px",
+                    marginBottom: "10px",
+                    padding: "0px",
+                  }}
+                />
+                Upload Recording
+              </div>
+            </label>
+            <input
+              type="file"
+              id="file-upload"
+              className="upload-input"
+              accept=".mp3"
+              onChange={handleFileChangeRecord}
+            />
+            {/* <button onClick={handleUploadRecord} className="upload-button">
+            Upload
+          </button> */}
+          </div>
+          <div className="buttons-container">
+            {!isRunning ? (
+              <button
+                // disabled={isRecording}
+                onClick={startRecording}
+                style={{
+                  // backgroundColor: "rgba(0, 255,0,0.4)",
+                  backgroundColor: "white",
+                  border: "none",
+                }}
+                className="start-button"
+              >
+                <IoMdMic
+                  style={{
+                    fontSize: "25px",
+                    color: "darkgreen",
+                  }}
+                />
+              </button>
+            ) : (
+              <button
+                // disabled={!isRecording}
+                onClick={stopRecording}
+                style={{
+                  // backgroundColor: "rgba(0, 255,0,0.4)",
+                  backgroundColor: "white",
+                  border: "none",
+                }}
+                className="stop-button"
+              >
+                <BsStopCircleFill
+                  style={{
+                    fontSize: "25px",
+                    color: "rgba(255, 12, 16, 1)",
+                    alignItems: "center",
+                    textAlign: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              </button>
+            )}
+            <p className="timer">{formatTime()}</p>
+          </div>
+        </div>
       </div>
       {image && (
         <div
@@ -390,8 +814,28 @@ function HomePage() {
             padding: "10px",
           }}
         >
-          {content && !search && allContent}
-          {typeResponse && search && handleRes}
+          {content && !search && !typeResponse && allContent}
+          {typeResponse && (
+            <div>
+              <h2
+                style={{
+                  margin: "10px",
+                  border: "0.6px solid white",
+                  boxShadow: " 2px 0px 6px 1px rgba(128, 128, 128, 0.658)",
+                  cursor: "pointer",
+                  padding: "10px",
+                  color: "#32a007",
+                  borderRadius: "5px",
+                  paddingLeft: "15px",
+                }}
+              >
+                Suggested Rice Leaf Disease
+              </h2>
+              <div style={{ display: "flex", flexWrap: "wrap" }}>
+                {handleRes}
+              </div>
+            </div>
+          )}
         </div>
         {/* {!content && (
           <div class="upload-btn-wrapper">
