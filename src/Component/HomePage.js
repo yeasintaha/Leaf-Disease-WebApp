@@ -17,7 +17,6 @@ import { RiDeleteBack2Fill } from "react-icons/ri";
 import { IoMdLogOut, IoMdMic, IoMdImage } from "react-icons/io";
 import { FaFileAudio } from "react-icons/fa";
 import { BsStopCircleFill } from "react-icons/bs";
-import { GrMicrophone } from "react-icons/gr";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -27,10 +26,7 @@ import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
 
 // const SpeechRecognition =
 //   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -59,7 +55,7 @@ function HomePage() {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+  const [hideTimer, setHideTimer] = useState(true);
 
   const navigate = useNavigate();
 
@@ -75,6 +71,7 @@ function HomePage() {
     clearInterval(intervalRef.current);
     setTime(0);
     setIsRunning(true);
+    setHideTimer(false);
     intervalRef.current = setInterval(() => {
       setTime((prevTime) => prevTime + 1);
     }, 1000);
@@ -736,7 +733,7 @@ function HomePage() {
                 <IoMdMic
                   style={{
                     fontSize: "25px",
-                    color: "darkgreen",
+                    color: "#2f8606",
                   }}
                 />
               </button>
@@ -762,7 +759,15 @@ function HomePage() {
                 />
               </button>
             )}
-            <p className="timer">{formatTime()}</p>
+            <p
+              className="timer"
+              style={{
+                display: hideTimer && "none",
+                color: !isRunning && "#333",
+              }}
+            >
+              {formatTime()}
+            </p>
           </div>
         </div>
       </div>

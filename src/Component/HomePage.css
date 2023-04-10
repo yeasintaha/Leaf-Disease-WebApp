@@ -173,7 +173,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .titleHeader {
-  font-size: 20;
+  font-size: 20px;
   font-weight: 700;
   color: green;
   cursor: pointer;
@@ -203,7 +203,7 @@ input[type="file"]::file-selector-button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 55px;
+  height: 60px;
   border: 3px solid #2f8606;
   border-radius: 5px;
   margin-top: 5px;
@@ -228,6 +228,7 @@ input[type="file"]::file-selector-button:hover {
   font-size: 20px;
   font-weight: bold;
   color: #333;
+  color: #2f8606;
   text-align: center;
   align-items: center;
   justify-content: center;
