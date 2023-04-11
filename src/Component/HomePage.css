@@ -31,7 +31,16 @@ input[type="file"]::file-selector-button:hover {
   border: none;
   margin-top: 10px;
   padding: 6px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  transition-duration: 0.1s;
 }
+
+.btnDataFetch:hover {
+  transform: scale(0.97);
+  background-color: lightgreen;
+  color: #333;
+}
+
 .fetchOutput {
   display: flex;
   flex-wrap: wrap;
@@ -64,6 +73,8 @@ input[type="file"]::file-selector-button:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  top: 0;
+  position: sticky;
   box-shadow: 2px 0px 6px 1px rgba(128, 128, 128, 0.938);
   border-bottom: 3px solid #2f8606;
   padding: 10px;
@@ -71,6 +82,8 @@ input[type="file"]::file-selector-button:hover {
   justify-content: space-around;
   margin-bottom: 10px;
   border-radius: 0px 0px 40px 40px;
+  background-color: white;
+  z-index: 1;
 }
 
 /* .header_div p {
@@ -102,13 +115,17 @@ input[type="file"]::file-selector-button:hover {
 .btnSeeMore {
   background: #32a007;
   color: #fff;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   border-radius: 10px;
-  width: 80px;
-  height: 30px;
+  width: 100px;
+  height: 40px;
   border: none;
   margin-top: 10px;
+}
+.btnSeeMore:hover {
+  background-color: lightgreen;
+  color: #333;
 }
 
 .upload-btn-wrapper {
@@ -204,7 +221,8 @@ input[type="file"]::file-selector-button:hover {
   align-items: center;
   justify-content: center;
   height: 60px;
-  border: 3px solid #2f8606;
+  /* border: 3px solid #2f8606; */
+  background-color: #32a007;
   border-radius: 5px;
   margin-top: 5px;
 }
@@ -228,7 +246,8 @@ input[type="file"]::file-selector-button:hover {
   font-size: 20px;
   font-weight: bold;
   color: #333;
-  color: #2f8606;
+  /* color: #2f8606; */
+  color: white;
   text-align: center;
   align-items: center;
   justify-content: center;
@@ -353,4 +372,21 @@ textarea::placeholder {
   transition-duration: 0.4s;
   font-weight: 500;
   /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); */
+}
+
+.controlMeasuresCard {
+  color: #333;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 300px;
+  /* box-shadow: 4px 4px 2px rgba(0, 0, 0, 0.4); */
+  box-shadow: 2px 0px 6px 1px rgba(128, 128, 128, 0.658);
+  margin: 5px;
+}
+.controlMeasuresCard p {
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
 }

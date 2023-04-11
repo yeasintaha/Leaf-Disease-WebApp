@@ -56,6 +56,7 @@ function HomePage() {
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
   const [hideTimer, setHideTimer] = useState(true);
+  const [controlMeasures, setControlMeasures] = useState(null);
 
   const navigate = useNavigate();
 
@@ -99,6 +100,17 @@ function HomePage() {
     const seconds = (time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   }
+
+  const fetchControlMeasures = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://127.0.0.1:8000/control-measures/${response[0]}`
+      );
+      setControlMeasures(data);
+      console.log(data);
+      console.log(data[0]);
+    } catch (e) {}
+  };
 
   const startRecording = () => {
     // Check if recording isn't blocked by browser
@@ -431,7 +443,7 @@ function HomePage() {
   const [search, setSearch] = useState("");
 
   const handleTypeDetection = async (e) => {
-    setSearch(e.target.value);
+    // setSearch(e.target.value);
     try {
       if (search != "" || search != null) {
         setTimeout(async () => {
@@ -641,16 +653,17 @@ function HomePage() {
             variant="outlined"
             style={{
               backgroundColor: "rgba(0, 255, 0, 0.2)",
-              width: 200,
+              width: 300,
               height: 200,
             }}
             value={search}
-            onChange={(e) => handleTypeDetection(e)}
+            onChange={(e) => setSearch(e.target.value)}
           />
           <button
             className={
               search ? "typeSuggestDiseaseBtn" : "typeSuggestDiseaseDisabledBtn"
             }
+            onClick={handleTypeDetection}
             disabled={!search ? true : false}
           >
             Detect Disease
@@ -671,7 +684,7 @@ function HomePage() {
                   }}
                 />
                 <p style={{ paddingTop: "10px" }}>
-                  Choose an Image To Identify Disease{" "}
+                  Choose an Image To Identify Disease
                 </p>
               </div>
             </button>
@@ -691,6 +704,7 @@ function HomePage() {
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
+                  cursor: "pointer",
                 }}
               >
                 <FaFileAudio
@@ -718,14 +732,17 @@ function HomePage() {
             Upload
           </button> */}
           </div>
-          <div className="buttons-container">
+          <div
+            className="buttons-container"
+            onClick={!isRunning ? startRecording : stopRecording}
+          >
             {!isRunning ? (
               <button
                 // disabled={isRecording}
-                onClick={startRecording}
+                // onClick={startRecording}
                 style={{
                   // backgroundColor: "rgba(0, 255,0,0.4)",
-                  backgroundColor: "white",
+                  backgroundColor: "#32a007",
                   border: "none",
                 }}
                 className="start-button"
@@ -733,17 +750,17 @@ function HomePage() {
                 <IoMdMic
                   style={{
                     fontSize: "25px",
-                    color: "#2f8606",
+                    color: "white",
                   }}
                 />
               </button>
             ) : (
               <button
                 // disabled={!isRecording}
-                onClick={stopRecording}
+                // onClick={stopRecording}
                 style={{
                   // backgroundColor: "rgba(0, 255,0,0.4)",
-                  backgroundColor: "white",
+                  backgroundColor: "#32a007",
                   border: "none",
                 }}
                 className="stop-button"
@@ -751,7 +768,7 @@ function HomePage() {
                 <BsStopCircleFill
                   style={{
                     fontSize: "25px",
-                    color: "rgba(255, 12, 16, 1)",
+                    color: "white",
                     alignItems: "center",
                     textAlign: "center",
                     justifyContent: "center",
@@ -763,10 +780,23 @@ function HomePage() {
               className="timer"
               style={{
                 display: hideTimer && "none",
-                color: !isRunning && "#333",
+                color: !isRunning && "rgba(0, 0, 0, 0.7)",
+                cursor:"grab",
               }}
             >
               {formatTime()}
+            </p>
+            <p
+              className="timer"
+              style={{
+                display: !hideTimer && "none",
+                fontSize: "15px",
+                fontWeight: "500",
+                color: "white",
+                cursor:"grab",
+              }}
+            >
+              Start Recording
             </p>
           </div>
         </div>
@@ -874,15 +904,34 @@ function HomePage() {
           <div className="diseaseOutput">
             <p className="diseaseOutputText">{response[0]} Disease Detected</p>
             {/* <p className="diseaseOutputText">Accuracy: {response[1] * 100}%</p> */}
-            {
-              <button onClick={fetchMoreImages} className="btnDataFetch">
-                See more images of {response[0]} disease
-              </button>
-            }
+
+            <button onClick={fetchMoreImages} className="btnDataFetch">
+              See more images of {response[0]} disease
+            </button>
+            <button onClick={fetchControlMeasures} className="btnDataFetch">
+              Click here to know the control measures of {response[0]} disease
+            </button>
           </div>
         )}
       </div>
       <div className="fetchOutput">
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {controlMeasures &&
+            controlMeasures?.map((item) => {
+              return (
+                <div className="controlMeasuresCard">
+                  <p>{item}</p>
+                </div>
+              );
+            })}
+        </div>
         {moreImages?.map((item, index) => {
           if (index < 4) {
             return (
