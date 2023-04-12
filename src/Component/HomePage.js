@@ -37,6 +37,9 @@ import Typography from "@mui/material/Typography";
 // mic.interimResults = true;
 // mic.lang = "bn-BD";
 
+const BASEURL = "http://0a2a-203-194-117-122.ngrok.io/";
+// const BASEURL = "http://127.0.0.1:8000/";
+
 function HomePage() {
   const [image, setImage] = useState(null);
   const [moreImages, setMoreImages] = useState(null);
@@ -104,7 +107,7 @@ function HomePage() {
   const fetchControlMeasures = async () => {
     try {
       const { data } = await axios.get(
-        `http://127.0.0.1:8000/control-measures/${response[0]}`
+        `${BASEURL}control-measures/${response[0]}`
       );
       setControlMeasures(data);
       console.log(data);
@@ -167,9 +170,7 @@ function HomePage() {
 
     try {
       setTimeout(async () => {
-        const { data } = await axios.get(
-          `http://127.0.0.1:8000/detect-voice/video.mp3`
-        );
+        const { data } = await axios.get(`${BASEURL}detect-voice/video.mp3`);
         if (data.text === "-1") {
           toast.error("Couldn't understand the voice, Please try again!", {
             position: "top-right",
@@ -185,9 +186,10 @@ function HomePage() {
           setTypeResponse(data.text);
           setTimeout(async () => {
             const { data } = await axios.get(
-              `http://127.0.0.1:8000/detect-symptomps/${typeResponse}`
+              `${BASEURL}detect-symptomps/${typeResponse}`
             );
             // alert(data.message);
+            // alert(data.sim);
             setTypeResponse(data);
             console.log(data.sim);
           }, 300);
@@ -195,16 +197,16 @@ function HomePage() {
         }
       }, 1000);
 
-      setTimeout(() => {
-        const imageRef = ref(storage, "Images/" + `video.mp3`);
-        deleteObject(imageRef)
-          .then(() => {
-            // alert("deleted");
-          })
-          .catch((error) => {
-            // alert("error deleting ");
-          });
-      }, 2000);
+      // setTimeout(() => {
+      //   const imageRef = ref(storage, "Images/" + `video.mp3`);
+      //   deleteObject(imageRef)
+      //     .then(() => {
+      //       // alert("deleted");
+      //     })
+      //     .catch((error) => {
+      //       // alert("error deleting ");
+      //     });
+      // }, 2000);
     } catch (err) {
       alert(err);
     }
@@ -225,7 +227,7 @@ function HomePage() {
 
       try {
         const { data } = await axios.get(
-          `http://127.0.0.1:8000/detect-voice/${event.target.files[0].name}`
+          `${BASEURL}detect-voice/${event.target.files[0].name}`
         );
 
         toast.success("Uploaded successfully!", {
@@ -268,7 +270,7 @@ function HomePage() {
 
           setTimeout(async () => {
             const { data } = await axios.get(
-              `http://127.0.0.1:8000/detect-symptomps/${typeResponse}`
+              `${BASEURL}detect-symptomps/${typeResponse}`
             );
             // alert(data.message);
             setTypeResponse(data);
@@ -356,9 +358,7 @@ function HomePage() {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(
-        `http://127.0.0.1:8000/detect-image/${image.name}`
-      );
+      const { data } = await axios.get(`${BASEURL}detect-image/${image.name}`);
       // alert(data[0]);
       setResponse(data);
       console.log(data);
@@ -448,7 +448,7 @@ function HomePage() {
       if (search != "" || search != null) {
         setTimeout(async () => {
           const { data } = await axios.get(
-            `http://127.0.0.1:8000/detect-symptomps/${search.trim()}`
+            `${BASEURL}detect-symptomps/${search.trim()}`
           );
           // alert(data.message);
           setTypeResponse(data);
@@ -781,7 +781,7 @@ function HomePage() {
               style={{
                 display: hideTimer && "none",
                 color: !isRunning && "rgba(0, 0, 0, 0.7)",
-                cursor:"grab",
+                cursor: "grab",
               }}
             >
               {formatTime()}
@@ -793,7 +793,7 @@ function HomePage() {
                 fontSize: "15px",
                 fontWeight: "500",
                 color: "white",
-                cursor:"grab",
+                cursor: "grab",
               }}
             >
               Start Recording
