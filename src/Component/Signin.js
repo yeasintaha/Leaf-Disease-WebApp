@@ -18,11 +18,11 @@ function Signin() {
 
   const { userCredentials, setUserCredentials } = useContext(UserContext);
 
-  // useEffect(() => {
-  //   if (userCredentials.Email != "") {
-  //     navigate("/home");
-  //   }
-  // });
+  useEffect(() => {
+    if (userCredentials.Email !== "") {
+      navigate("/home");
+    }
+  });
 
   // const signin = (e) => {
   //   navigate("/");
@@ -64,7 +64,7 @@ function Signin() {
             Email: email,
             Password: password,
           });
-          console.log(userCredentials);
+          // console.log(userCredentials);
           setTimeout(() => {
             toast.success("You have successfully signed in!", {
               position: "top-right",
@@ -77,8 +77,9 @@ function Signin() {
               theme: "light",
             });
           }, 1000);
-
-          navigate("/home");
+          setTimeout(() => {
+            navigate("/home");
+          }, 300);
         })
         .catch((error) => alert(error.message));
     }
@@ -92,9 +93,18 @@ function Signin() {
     <div>
       <div className="login">
         <div className="login__box">
-          <Link to="/home" textDecoration="none">
+          <div
+            style={{ cursor: "grab" }}
+            onClick={() => {
+              setTimeout(() => {
+                if (userCredentials.Email !== "") {
+                  navigate("/home");
+                }
+              }, 200);
+            }}
+          >
             <img className="login__logo" src="\leaf.png" alt="Leaf" />
-          </Link>
+          </div>
 
           <h1>Sign In</h1>
 

@@ -68,6 +68,10 @@ function HomePage() {
   useEffect(() => {
     //Declares the recorder object and stores it inside of ref
     recorder.current = new MicRecorder({ bitRate: 128 });
+
+    if (userCredentials.Email === "") {
+      navigate("/");
+    }
   }, []);
 
   function handleStart() {
