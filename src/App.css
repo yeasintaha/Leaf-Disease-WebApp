@@ -1,0 +1,46 @@
+/* Set the font family and font size of the Google Translate Element */
+.goog-te-banner-frame > div:first-child {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+/* Set the background color and border of the Google Translate Element */
+.goog-te-banner-frame {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Set the background color of the language dropdown */
+.goog-te-menu-value {
+  background-color: #fff;
+}
+
+/* Set the color of the language dropdown text */
+.goog-te-menu-value span:first-child {
+  color: #333;
+}
+
+/* Set the color of the Google Translate Element button */
+.goog-te-banner-button {
+  color: #333;
+}
+
+/* Set the hover effect of the Google Translate Element button */
+.goog-te-banner-button:hover {
+  color: #000;
+}
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+.skiptranslate {
+  display: flex !important;
+  height: 0px;
+  width: 0px;
+}
+.text {
+  display: none;
+}
+.VIpgJd-ZVi9od-vH1Gmf {
+  display: none;
+}
