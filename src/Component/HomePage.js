@@ -37,8 +37,8 @@ import Typography from "@mui/material/Typography";
 // mic.interimResults = true;
 // mic.lang = "bn-BD";
 
-const BASEURL = "https://auris.serveo.net/";
-// const BASEURL = "http://127.0.0.1:8000/";
+// const BASEURL = "https://auris.serveo.net/" || "http://127.0.0.1:8000/";
+const BASEURL = "http://127.0.0.1:8000/";
 
 function HomePage() {
   const [image, setImage] = useState(null);
@@ -70,7 +70,7 @@ function HomePage() {
     recorder.current = new MicRecorder({ bitRate: 128 });
 
     if (userCredentials.Email === "") {
-      navigate("/");
+      navigate("/home");
     }
   }, []);
 
