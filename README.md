@@ -5,9 +5,9 @@ This project aims to develop a leaf disease classification system that can be us
 **System Overview**
 
 _The system consists of three main components:_ <br />
-    `A voice recognition module`: This module converts the user's voice command or MP3 file into text. <br />
-    `A text processing module`: This module preprocesses the text input to prepare it for the classification model. <br />
-    `Leaf disease classification model`: This model is trained on a large dataset of leaf images and disease labels. The model takes the preprocessed text input as input and outputs a prediction of the leaf disease. <br />
+    `Voice Recognition Module`: This module converts the user's voice command or MP3 file into text. <br />
+    `Text Processing Module`: This module preprocesses the text input to prepare it for the classification model. <br />
+    `Leaf Disease Classification Model`: This model is trained on a large dataset of leaf images and disease labels. The model takes the preprocessed text input as input and outputs a prediction of the leaf disease. <br />
 
 <br />
 
