@@ -14,5 +14,8 @@ _The system consists of three main components:_ <br />
 **Demonstration**
 <br />
 _The following GIF shows a demonstration of the system in action:_
+<br /> 
 <br />
 ![project_demonstration](https://github.com/yeasintaha/Leaf-Disease-WebApp/assets/62749854/f851260a-2419-4973-a220-9ea7c6e5eca7)
+
+<br />
