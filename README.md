@@ -11,6 +11,13 @@ _The system consists of three main components:_ <br />
 
 <br />
 
+Web App: 
+[Leaf Disease Classification Web Application](https://leaf-disease-web-app-meahmeah82-gmailcom.vercel.app/)
+
+
+<br/>
+<br/>
+
 **Demonstration**
 <br />
 _The following GIF shows a demonstration of the system in action:_
@@ -20,9 +27,4 @@ _The following GIF shows a demonstration of the system in action:_
 
 <br />
 
-Web App: 
-[Web App](https://leaf-disease-web-app-meahmeah82-gmailcom.vercel.app/)
 
-
-<br/>
-<br/>
