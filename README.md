@@ -11,8 +11,7 @@ _The system consists of three main components:_ <br />
 
 <br />
 <br />
-Backend Code: 
-[Leaf Disease Classification Web Application](https://github.com/yeasintaha/Leaf_App_Backend)
+Backend Code: https://github.com/yeasintaha/Leaf_App_Backend
 
 <br />
 <br />
