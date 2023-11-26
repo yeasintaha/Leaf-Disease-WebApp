@@ -10,6 +10,12 @@ _The system consists of three main components:_ <br />
     `Leaf Disease Classification Model`: This model is trained on a large dataset of leaf images and disease labels. The model takes the preprocessed text input as input and outputs a prediction of the leaf disease. <br />
 
 <br />
+<br />
+Backend Code: 
+[Leaf Disease Classification Web Application](https://github.com/yeasintaha/Leaf_App_Backend)
+
+<br />
+<br />
 
 Web App: 
 [Leaf Disease Classification Web Application](https://leaf-disease-web-app-meahmeah82-gmailcom.vercel.app/)
